@@ -1,0 +1,18 @@
+﻿version: '3.8'
+
+services:
+  nexus-api:
+    build: ./backend
+    ports: ["8080:8080"]
+    volumes:
+      - ./nexus-data:/app/data
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/nexusdb;DB_CLOSE_ON_EXIT=FALSE;AUTO_SERVER=TRUE
+      - SPRING_APPLICATION_NAME=journeyman-nexus-pitcraft
+      - SPRING_THREADS_VIRTUAL_ENABLED=true
+
+  nexus-ui:
+    build: ./frontend
+    ports: ["3000:3000"]
+    depends_on:
+      - nexus-api

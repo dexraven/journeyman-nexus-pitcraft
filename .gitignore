@@ -1,25 +1,68 @@
-# --- SYSTEM GENERATED ---
+# ==========================
+# 1. OS & SYSTEM FILES
+# ==========================
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# --- BUILD ARTIFACTS (Don't commit compiled code) ---
-backend/build/
-backend/.gradle/
-frontend/dist/
-frontend/node_modules/
-
-# --- SECRETS & KEYS (CRITICAL) ---
-# We keep a template (see below), but ignore the real file
-backend/src/main/resources/application.properties
-.env
-
-# --- DATA & BACKUPS (Don't commit heavy binary files) ---
-pitcraft-data/
-archives/
-*.zip
-*.log
-
-# --- IDE SETTINGS (Optional, keeps repo clean) ---
+# ==========================
+# 2. IDE & EDITOR SETTINGS
+# ==========================
+# IntelliJ IDEA
 .idea/
-.vscode/
+*.iws
 *.iml
+*.ipr
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# ==========================
+# 3. BACKEND (Spring Boot / Gradle)
+# ==========================
+backend/.gradle/
+backend/build/
+backend/out/
+backend/bin/
+*.class
+*.log
+*.jar
+*.war
+
+# CRITICAL: Ignore the file containing real API Keys
+backend/src/main/resources/application.properties
+
+# ==========================
+# 4. FRONTEND (React / Node)
+# ==========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================
+# 5. JOURNEYMAN NEXUS DATA
+# ==========================
+# Ignore the live database folder (User Data)
+nexus-data/
+
+# Ignore the backups folder
+archives/
+
+# Ignore local H2 database lock files if running outside Docker
+*.mv.db
+*.trace.db
+
+# ==========================
+# 6. DOCKER & LOGS
+# ==========================
+docker-compose.override.yml
+.env
