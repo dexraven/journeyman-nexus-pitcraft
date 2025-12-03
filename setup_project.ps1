@@ -115,3 +115,5 @@ services:
 Set-Content -Path "docker-compose.yml" -Value $dockerContent -Encoding UTF8
 
 Write-Host "✅ SKELETON DEPLOYED to Current Directory." -ForegroundColor Green
+
+Start-Sleep -Seconds 3
