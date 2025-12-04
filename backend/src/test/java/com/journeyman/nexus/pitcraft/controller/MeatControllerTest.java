@@ -30,7 +30,7 @@ class MeatControllerTest {
     @MockBean
     private MeatService meatService;
 
-    @Autowired
+    @MockBean
     private ObjectMapper objectMapper;
 
     @Test

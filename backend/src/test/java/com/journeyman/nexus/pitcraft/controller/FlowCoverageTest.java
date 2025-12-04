@@ -35,12 +35,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FlowCoverageTest {
 
     @Autowired MockMvc mockMvc;
-    @Autowired ObjectMapper mapper;
 
     @MockBean MeatSessionRepository repository;
-    @MockBean MeatPlanFactory factory;
     @MockBean NlpService nlpService;
-    @MockBean SmsService smsService;
 
     @Test
     void testCancelFlow_FullCoverage() throws Exception {

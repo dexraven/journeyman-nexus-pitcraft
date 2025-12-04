@@ -76,9 +76,7 @@ class MeatServiceTest {
         when(repository.findById("999")).thenReturn(Optional.of(session));
 
         // Expect Exception
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
-            service.cancelSession("999");
-        });
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> service.cancelSession("999"));
 
         assertTrue(exception.getMessage().contains("Inventory consumed"));
 

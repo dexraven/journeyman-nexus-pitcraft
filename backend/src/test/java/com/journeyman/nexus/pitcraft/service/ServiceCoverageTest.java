@@ -22,24 +22,18 @@ class ServiceCoverageTest {
     @InjectMocks
     private SmsService smsService;
 
-    // These mocks are created by @ExtendWith, we will use them in the NlpService test
-    @Mock private ChatClient chatClient;
     @Mock private ChatModel chatModel;
 
     @Test
     void testSmsService_Safeguards() {
-        // Case 1: Keys are missing (Default state in test)
         smsService.init();
         smsService.sendCheckIn("Brisket");
         smsService.sendReply("Hello");
-        // Pass if no exception thrown
 
-        // Case 2: Fake keys to force logic execution
         ReflectionTestUtils.setField(smsService, "accountSid", "FAKE_SID");
         ReflectionTestUtils.setField(smsService, "fromNumber", "+1555");
         ReflectionTestUtils.setField(smsService, "userNumber", "+1555");
 
-        // Verify it handles the Twilio exception gracefully
         assertDoesNotThrow(() -> smsService.sendCheckIn("Brisket"));
     }
 
