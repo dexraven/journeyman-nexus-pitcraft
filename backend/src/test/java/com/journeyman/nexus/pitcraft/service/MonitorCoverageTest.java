@@ -18,9 +18,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class MonitorCoverageTest {
 
-    @Mock MeatSessionRepository repository;
-    @Mock SmsService smsService;
-    @InjectMocks CookingMonitor monitor;
+    @Mock
+    MeatSessionRepository repository;
+
+    @Mock
+    SmsService smsService;
+
+    @InjectMocks
+    CookingMonitor monitor;
 
     @Test
     void testCheckMeatStatus() {

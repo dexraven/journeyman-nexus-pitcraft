@@ -1,8 +1,11 @@
 package com.journeyman.nexus.pitcraft.service;
 
 import com.journeyman.nexus.pitcraft.ai.PitCommand;
-import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -10,14 +13,18 @@ public class NlpService {
 
     private final ChatClient chatClient;
 
-    public NlpService(ChatClient.Builder builder) {
-        this.chatClient = builder.build();
+    // FIX 1: Inject ChatClient directly (No Builder needed in 0.8.1)
+    public NlpService(ChatClient chatClient) {
+        this.chatClient = chatClient;
     }
 
     public PitCommand parseUserIntent(String userText, List<String> activeMeats) {
-        String prompt = """
+        // FIX 2: Use BeanOutputParser for structured JSON conversion
+        BeanOutputParser<PitCommand> parser = new BeanOutputParser<>(PitCommand.class);
+
+        String promptText = """
             You are a BBQ Assistant. Translate text to commands.
-            Active meats: %s.
+            Active meats: {activeMeats}.
             
             RULES:
             1. "stall", "wait", "add time" -> EXTEND_TIME
@@ -26,16 +33,22 @@ public class NlpService {
             4. Extract minutes (default 30).
             
             Return JSON matching PitCommand structure.
-            """.formatted(String.join(", ", activeMeats));
+            {format}
+            """;
+
+        // FIX 3: Use PromptTemplate to inject variables and the JSON format
+        PromptTemplate template = new PromptTemplate(promptText);
+        template.add("activeMeats", String.join(", ", activeMeats));
+        template.add("format", parser.getFormat());
 
         try {
-            return chatClient.prompt()
-                    .system(prompt)
-                    .user(userText)
-                    .call()
-                    .entity(PitCommand.class);
+            // FIX 4: Standard .call() instead of fluent .prompt()
+            String response = chatClient.call(template.create()).getResult().getOutput().getContent();
+            return parser.parse(response);
+
         } catch (Exception e) {
-            // Fallback if AI fails or no key
+            // Fallback
+            System.err.println("AI Parse Error: " + e.getMessage());
             return new PitCommand(PitCommand.Action.UNKNOWN, null, 0);
         }
     }

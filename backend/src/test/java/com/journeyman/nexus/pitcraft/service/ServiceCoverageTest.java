@@ -6,11 +6,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ServiceCoverageTest {
@@ -18,39 +22,34 @@ class ServiceCoverageTest {
     @InjectMocks
     private SmsService smsService;
 
-    // We mock the ChatClient chain for NlpService
+    // These mocks are created by @ExtendWith, we will use them in the NlpService test
     @Mock private ChatClient chatClient;
-    @Mock private ChatClient.ChatClientRequestSpec requestSpec;
-    @Mock private ChatClient.CallResponseSpec responseSpec;
+    @Mock private ChatModel chatModel;
 
     @Test
     void testSmsService_Safeguards() {
         // Case 1: Keys are missing (Default state in test)
-        // init() should not crash, sendCheckIn should return early
         smsService.init();
         smsService.sendCheckIn("Brisket");
         smsService.sendReply("Hello");
         // Pass if no exception thrown
 
-        // Case 2: We inject a fake key to test the "Exception" block
+        // Case 2: Fake keys to force logic execution
         ReflectionTestUtils.setField(smsService, "accountSid", "FAKE_SID");
         ReflectionTestUtils.setField(smsService, "fromNumber", "+1555");
         ReflectionTestUtils.setField(smsService, "userNumber", "+1555");
 
-        // This will try to call Twilio and fail (because key is fake)
-        // We want to ensure it catches the exception and prints to stderr, not crashes app
+        // Verify it handles the Twilio exception gracefully
         assertDoesNotThrow(() -> smsService.sendCheckIn("Brisket"));
     }
 
     @Test
     void testNlpService_Fallback() {
-        // We need to manually construct NlpService because of the Builder pattern in constructor
-        ChatClient.Builder builder = mock(ChatClient.Builder.class);
-        when(builder.build()).thenReturn(chatClient);
-        NlpService nlpService = new NlpService(builder);
+        ChatClient realChatClient = ChatClient.builder(chatModel).build();
 
-        // Case 1: AI Throws Exception (e.g., API Down)
-        when(chatClient.prompt()).thenThrow(new RuntimeException("API Down"));
+        NlpService nlpService = new NlpService(realChatClient);
+
+        when(chatModel.call(any(Prompt.class))).thenThrow(new RuntimeException("API Down"));
 
         PitCommand result = nlpService.parseUserIntent("Add 30 mins", java.util.Collections.emptyList());
 

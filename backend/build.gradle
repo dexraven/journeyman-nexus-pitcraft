@@ -23,7 +23,7 @@ repositories {
 }
 
 ext {
-    set('springAiVersion', "0.8.1")
+    set('springAiVersion', "1.0.0-M1")
 }
 
 dependencies {
@@ -32,11 +32,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'com.h2database:h2'
     compileOnly 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'        // <--- ADD THIS
     annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok' // <--- ADD THIS
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.twilio.sdk:twilio:9.6.0'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
     implementation 'com.squareup:square:30.0.0.20230608'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 dependencyManagement {

@@ -1,8 +1,12 @@
-package com.journeyman.nexus.pitcraft.strategy;
+package com.journeyman.nexus.pitcraft.service;
 
 import com.journeyman.nexus.pitcraft.domain.MeatType;
 import com.journeyman.nexus.pitcraft.dto.CookingPlan;
 import com.journeyman.nexus.pitcraft.dto.MeatRequest;
+import com.journeyman.nexus.pitcraft.strategy.MeatPlanFactory;
+import com.journeyman.nexus.pitcraft.strategy.PoultryStrategy;
+import com.journeyman.nexus.pitcraft.strategy.SlowSmokeStrategy;
+import com.journeyman.nexus.pitcraft.strategy.StandardSmokeStrategy;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -53,8 +57,8 @@ class StrategyCoverageTest {
         assertEquals(20.0, p4.getTotalProcessHours());
 
         // Test Ingredients logic branching
-        assertTrue(s.getIngredients(req(MeatType.PORK_SHOULDER)).contains("Pork Rub"));
-        assertTrue(s.getIngredients(req(MeatType.BEEF_RIBS)).contains("BBQ Sauce"));
+        assertTrue(s.getIngredients(req(MeatType.PORK_SHOULDER)).contains("Ribnoxious"));
+        assertTrue(s.getIngredients(req(MeatType.BEEF_RIBS)).contains("Brisket Magic"));
     }
 
     @Test

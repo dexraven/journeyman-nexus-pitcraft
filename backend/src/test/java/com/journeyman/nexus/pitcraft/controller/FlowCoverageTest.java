@@ -5,8 +5,6 @@ import com.journeyman.nexus.pitcraft.ai.PitCommand;
 import com.journeyman.nexus.pitcraft.domain.CookStatus;
 import com.journeyman.nexus.pitcraft.domain.MeatSession;
 import com.journeyman.nexus.pitcraft.domain.MeatType;
-import com.journeyman.nexus.pitcraft.dto.CookingPlan;
-import com.journeyman.nexus.pitcraft.dto.MeatRequest;
 import com.journeyman.nexus.pitcraft.repository.MeatSessionRepository;
 import com.journeyman.nexus.pitcraft.service.MeatService;
 import com.journeyman.nexus.pitcraft.service.NlpService;
@@ -16,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,8 +24,10 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 // We test Controllers and Services together to ensure flow coverage
 @WebMvcTest({MeatController.class, SmsWebhookController.class})
