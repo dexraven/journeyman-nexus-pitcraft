@@ -12,7 +12,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class CookingMonitor {
+public class CookingMonitorService {
 
     private final MeatSessionRepository repository;
     private final SmsService smsService;

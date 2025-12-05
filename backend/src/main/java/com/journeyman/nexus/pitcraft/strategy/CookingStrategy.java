@@ -5,6 +5,9 @@ import com.journeyman.nexus.pitcraft.dto.CookingPlan;
 import com.journeyman.nexus.pitcraft.dto.MeatRequest;
 
 public interface CookingStrategy {
-    boolean supports(MeatType type);
-    CookingPlan calculate(MeatRequest request);
+
+    boolean supports(MeatType meatType);
+
+    // Update this line to match the BaseMeatStrategy
+    CookingPlan calculate(MeatRequest request, double outsideTemp);
 }

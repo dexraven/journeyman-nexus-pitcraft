@@ -14,12 +14,26 @@ public class SlowSmokeStrategy extends BaseMeatStrategy {
         return type == MeatType.BEEF_BRISKET;
     }
 
+    // --- UPDATED METHOD SIGNATURE ---
     @Override
-    protected ActivePhase calculateActivePhase(MeatRequest request) {
-        // 12h Smoke + 12h Rest = 24h Active
+    protected ActivePhase calculateActivePhase(MeatRequest request, double outsideTemp) {
+        // Base: 12 hours cook (Goldee's Method style)
+        double baseCookHours = 12.0;
+
+        // Apply Weather Adjustment to the COOK phase only
+        double adjustedCookHours = baseCookHours;
+        if (outsideTemp < 40.0) {
+            adjustedCookHours = baseCookHours * 1.15; // +15% (Approx 13.8 hours)
+        } else if (outsideTemp > 90.0) {
+            adjustedCookHours = baseCookHours * 0.95; // -5% (Approx 11.4 hours)
+        }
+
+        // Rest is usually indoors/controlled, so we don't adjust it for weather
+        double restHours = 12.0;
+
         return ActivePhase.builder()
-                .cookHours(12.0)
-                .restHours(12.0)
+                .cookHours(adjustedCookHours)
+                .restHours(restHours)
                 .instructions("Smoke until probe tender (~203F), then Heated Rest for 12 hours.")
                 .build();
     }

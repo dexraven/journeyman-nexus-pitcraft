@@ -12,8 +12,10 @@ public abstract class BaseMeatStrategy implements CookingStrategy {
     protected static final long PREP_HOURS = 12; // Universal Overnight Brine
 
     @Override
-    public CookingPlan calculate(MeatRequest request) {
-        ActivePhase phase = calculateActivePhase(request);
+    public CookingPlan calculate(MeatRequest request, double outsideTemp) {
+
+        // Pass temp down to the specific strategy (Standard, Brisket, etc.)
+        ActivePhase phase = calculateActivePhase(request, outsideTemp);
 
         LocalDateTime fireTime = request.getDesiredServingTime()
                 .minusHours((long) (phase.cookHours + phase.restHours));
@@ -31,7 +33,9 @@ public abstract class BaseMeatStrategy implements CookingStrategy {
                 .build();
     }
 
-    protected abstract ActivePhase calculateActivePhase(MeatRequest request);
+    // --- UPDATED ABSTRACT METHOD: Subclasses must implement this ---
+    protected abstract ActivePhase calculateActivePhase(MeatRequest request, double outsideTemp);
+
     protected abstract List<String> getIngredients(MeatRequest request);
 
     @Builder

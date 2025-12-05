@@ -14,16 +14,29 @@ public class PoultryStrategy extends BaseMeatStrategy {
         return type == MeatType.CHICKEN || type == MeatType.TURKEY;
     }
 
+    // --- LOGIC MOVED HERE ---
     @Override
-    protected ActivePhase calculateActivePhase(MeatRequest request) {
-        double cookTime = (request.getType() == MeatType.TURKEY)
-                ? (request.getWeightInLbs() * 15) / 60.0
-                : (request.getWeightInLbs() * 20) / 60.0;
+    protected ActivePhase calculateActivePhase(MeatRequest request, double outsideTemp) {
+        // 1. Calculate Base Time (From your old logic)
+        // Turkey = 15 mins/lb, Chicken = 20 mins/lb
+        double baseMinutes = (request.getType() == MeatType.TURKEY)
+                ? (request.getWeightInLbs() * 15)
+                : (request.getWeightInLbs() * 20);
+
+        double baseHours = baseMinutes / 60.0;
+
+        // 2. Apply Weather Adjustment (Poultry is sensitive to wind/cold)
+        double adjustedHours = baseHours;
+        if (outsideTemp < 40.0) {
+            adjustedHours = baseHours * 1.15; // +15% if freezing
+        } else if (outsideTemp > 90.0) {
+            adjustedHours = baseHours * 0.95; // -5% if hot
+        }
 
         return ActivePhase.builder()
-                .cookHours(cookTime)
+                .cookHours(adjustedHours)
                 .restHours(request.getType() == MeatType.TURKEY ? 1.0 : 0.5)
-                .instructions("Roast High Heat until 165F internal.")
+                .instructions("Roast High Heat (325F+) until 165F internal.")
                 .build();
     }
 

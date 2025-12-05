@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -17,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class ServiceCoverageTest {
+class SmsServiceTest {
 
     @InjectMocks
     private SmsService smsService;
@@ -39,12 +38,12 @@ class ServiceCoverageTest {
 
     @Test
     void testNlpService_Fallback() {
-        ChatClient realChatClient = ChatClient.builder(chatModel).build();
+        NlpService nlpService = new NlpService(chatModel);
 
-        NlpService nlpService = new NlpService(realChatClient);
-
+        // Setup the failure scenario
         when(chatModel.call(any(Prompt.class))).thenThrow(new RuntimeException("API Down"));
 
+        // Run Logic
         PitCommand result = nlpService.parseUserIntent("Add 30 mins", java.util.Collections.emptyList());
 
         assertEquals(PitCommand.Action.UNKNOWN, result.action());

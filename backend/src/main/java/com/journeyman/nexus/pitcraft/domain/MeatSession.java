@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "meat_sessions")
+@Table(name = "meat_session")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +23,7 @@ public class MeatSession {
     @Enumerated(EnumType.STRING)
     private MeatType meatType;
 
+    @Column(name = "weight")
     private double weightInLbs;
 
     // --- The Schedule (Mutable via SMS) ---

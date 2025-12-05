@@ -30,11 +30,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.flywaydb:flyway-core'
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
     compileOnly 'org.projectlombok:lombok'
-    testCompileOnly 'org.projectlombok:lombok'        // <--- ADD THIS
+    testCompileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok' // <--- ADD THIS
+    testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.twilio.sdk:twilio:9.6.0'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'

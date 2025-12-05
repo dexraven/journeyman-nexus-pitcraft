@@ -1,67 +1,145 @@
 package com.journeyman.nexus.pitcraft.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.journeyman.nexus.pitcraft.domain.CookStatus;
 import com.journeyman.nexus.pitcraft.domain.MeatSession;
 import com.journeyman.nexus.pitcraft.domain.MeatType;
 import com.journeyman.nexus.pitcraft.dto.MeatRequest;
 import com.journeyman.nexus.pitcraft.service.MeatService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-@WebMvcTest(MeatController.class)
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class MeatControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private MeatService meatService;
 
-    @MockBean
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private MeatController meatController;
 
+    // Order Creation test
     @Test
-    void planMeat_ReturnsSession() throws Exception {
-        MeatRequest req = new MeatRequest();
-        req.setType(MeatType.BEEF_BRISKET);
-        req.setWeightInLbs(12.0);
-
+    void addMeat_Success() {
+        // Arrange
+        MeatRequest request = new MeatRequest();
+        request.setType(MeatType.BEEF_BRISKET);
         MeatSession session = new MeatSession();
-        session.setId("uuid-1");
-        session.setMeatType(MeatType.BEEF_BRISKET);
-        session.setStatus(CookStatus.PLANNED);
 
-        when(meatService.createSession(any())).thenReturn(session);
+        when(meatService.createSession(request)).thenReturn(session);
 
-        mockMvc.perform(post("/api/v1/meat/plan")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value("uuid-1"))
-                .andExpect(jsonPath("$.meatType").value("BEEF_BRISKET"));
+        // Act
+        ResponseEntity<MeatSession> response = meatController.addMeat(request);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(session, response.getBody());
     }
 
     @Test
-    void cancelMeat_Conflict_WhenTooLate() throws Exception {
-        // Simulate the service throwing the "Point of No Return" error
-        doThrow(new IllegalStateException("Inventory consumed"))
-                .when(meatService).cancelSession("active-id");
+    void addMeat_NullInput_ThrowsException() {
+        // This validates the input guard we added
+        assertThrows(IllegalArgumentException.class, () -> {
+            meatController.addMeat(null);
+        });
 
-        mockMvc.perform(put("/api/v1/meat/active-id/cancel"))
-                .andExpect(status().isConflict()) // Expect 409
-                .andExpect(jsonPath("$.error").value("CANCELLATION_DENIED"));
+        // Ensure we never called the service
+        verifyNoInteractions(meatService);
+    }
+
+    // Active orders test
+
+    @Test
+    void getActive_ReturnsList() {
+        when(meatService.getActiveSessions()).thenReturn(Collections.emptyList());
+
+        ResponseEntity<List<MeatSession>> response = meatController.getActive();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+
+    // Order Cancellation tests
+    @Test
+    void cancelMeat_Success() {
+        ResponseEntity<?> response = meatController.cancelMeat("uuid-123");
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(meatService).cancelSession("uuid-123");
+    }
+
+    @Test
+    void cancelMeat_BadInput_ThrowsException() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            meatController.cancelMeat("");
+        });
+    }
+
+    @Test
+    void cancelMeat_Conflict_ThrowsException() {
+        doThrow(new IllegalStateException("Too late to cancel"))
+                .when(meatService).cancelSession("uuid-123");
+
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> {
+            meatController.cancelMeat("uuid-123");
+        });
+
+        assertEquals("Too late to cancel", ex.getMessage());
+    }
+
+    @Test
+    void cancelMeat_NotFound_ThrowsException() {
+        doThrow(new EntityNotFoundException("Session with ID unknown-id not found"))
+                .when(meatService).cancelSession("unknown-id");
+
+        EntityNotFoundException ex = assertThrows(EntityNotFoundException.class, () -> {
+            meatController.cancelMeat("unknown-id");
+        });
+
+        assertEquals("Session with ID unknown-id not found", ex.getMessage());
+    }
+
+    // --- TEMP LOGGING TESTS ---
+
+    @Test
+    void logTemp_Success() {
+        // 1. Arrange
+        String id = "session-123";
+        Map<String, Double> payload = java.util.Map.of("degrees", 225.5);
+
+        // 2. Act
+        ResponseEntity<Void> response = meatController.logTemp(id, payload);
+
+        // 3. Assert
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+
+        // Verify service was called with correct ID and Value
+        verify(meatService).logTemperature("session-123", 225.5);
+    }
+
+    @Test
+    void logTemp_MissingKey_ThrowsException() {
+        // 1. Arrange: Payload exists but has wrong key
+        Map<String, Double> payload = java.util.Map.of("wrong_key", 100.0);
+
+        // 2. Act & Assert
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            meatController.logTemp("session-123", payload);
+        });
+
+        assertEquals("Payload must contain 'degrees'", ex.getMessage());
+        verifyNoInteractions(meatService);
     }
 }

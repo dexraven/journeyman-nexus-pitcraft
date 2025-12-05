@@ -16,7 +16,7 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MonitorCoverageTest {
+class CookingMonitorServiceTest {
 
     @Mock
     MeatSessionRepository repository;
@@ -25,7 +25,7 @@ class MonitorCoverageTest {
     SmsService smsService;
 
     @InjectMocks
-    CookingMonitor monitor;
+    CookingMonitorService monitor;
 
     @Test
     void testCheckMeatStatus() {

@@ -15,11 +15,13 @@ public class MeatPlanFactory {
         this.strategies = strategies;
     }
 
-    public CookingPlan generatePlan(MeatRequest request) {
+    // UPDATE: Now accepts 'outsideTemp'
+    public CookingPlan generatePlan(MeatRequest request, double outsideTemp) {
         return strategies.stream()
                 .filter(strategy -> strategy.supports(request.getType()))
                 .findFirst()
-                .map(strategy -> strategy.calculate(request))
+                // UPDATE: Passes 'outsideTemp' to the strategy
+                .map(strategy -> strategy.calculate(request, outsideTemp))
                 .orElseThrow(() -> new IllegalArgumentException("No strategy for: " + request.getType()));
     }
 }
