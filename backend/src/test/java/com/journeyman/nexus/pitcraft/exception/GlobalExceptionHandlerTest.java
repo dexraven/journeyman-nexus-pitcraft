@@ -2,59 +2,68 @@ package com.journeyman.nexus.pitcraft.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GlobalExceptionHandlerTest {
 
-    // It's just a POJO, so we can test it directly without Spring context
+    // Pure POJO test - no Spring Context needed
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    void handleNotFound_Returns400() {
-        EntityNotFoundException ex = new EntityNotFoundException("MeatSession not found");
+    void handleNotFound_Returns404() {
+        // Arrange
+        EntityNotFoundException ex = new EntityNotFoundException("Session not found");
 
+        // Act
         ProblemDetail response = handler.handleNotFound(ex);
 
-        assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("MeatSession not found", response.getDetail());
-    }
-
-    @Test
-    void handleNotFound_Returns404() {
-        NoResourceFoundException ex = new NoResourceFoundException(HttpMethod.GET, "Invalid endpoint");
-
-        ProblemDetail response = handler.handleWrongUrl(ex);
-
+        // Assert
         assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
-        assertEquals("Endpoint not found: Invalid endpoint", response.getDetail());
+        assertEquals("Session not found", response.getDetail());
     }
 
     @Test
-    void handleConflict_Returns409() {
+    void handleConflict_Returns409_WithCustomTitle() {
+        // Arrange
         IllegalStateException ex = new IllegalStateException("Too late to cancel");
 
+        // Act
         ProblemDetail response = handler.handleConflict(ex);
 
+        // Assert
         assertEquals(HttpStatus.CONFLICT.value(), response.getStatus());
         assertEquals("Too late to cancel", response.getDetail());
-        assertEquals("Conflict", response.getTitle());
+        // Verify the specific title we added for the frontend logic
+        assertEquals("CANCELLATION_DENIED", response.getTitle());
     }
 
     @Test
     void handleBadRequest_Returns400() {
-        // 1. Arrange
-        IllegalArgumentException ex = new IllegalArgumentException("ID cannot be null");
+        // Arrange
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid input data");
 
-        // 2. Act
+        // Act
         ProblemDetail response = handler.handleBadRequest(ex);
 
-        // 3. Assert
+        // Assert
         assertEquals(HttpStatus.BAD_REQUEST.value(), response.getStatus());
-        assertEquals("ID cannot be null", response.getDetail());
+        assertEquals("Invalid input data", response.getDetail());
+    }
+
+    @Test
+    void handleGeneral_Returns500() {
+        // Arrange
+        RuntimeException ex = new RuntimeException("Unexpected Null Pointer");
+
+        // Act
+        ProblemDetail response = handler.handleGeneral(ex);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), response.getStatus());
+        // Ensure the message format matches "Internal Server Error: [msg]"
+        assertEquals("Internal Server Error: Unexpected Null Pointer", response.getDetail());
     }
 }

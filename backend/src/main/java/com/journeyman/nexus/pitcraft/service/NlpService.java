@@ -1,10 +1,10 @@
 package com.journeyman.nexus.pitcraft.service;
 
 import com.journeyman.nexus.pitcraft.ai.PitCommand;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.BeanOutputParser;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class NlpService {
         }
     }
 
-    @NotNull
+    @NonNull
     private static PromptTemplate getPromptTemplate() {
         String promptText = """
             You are a BBQ Assistant. Translate text to commands.

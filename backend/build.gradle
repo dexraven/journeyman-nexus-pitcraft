@@ -40,8 +40,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'com.twilio.sdk:twilio:9.6.0'
     implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
-    implementation 'com.squareup:square:30.0.0.20230608'
+    implementation 'com.stripe:stripe-java:24.1.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mockito:mockito-inline:5.2.0'
 }
 
 dependencyManagement {
